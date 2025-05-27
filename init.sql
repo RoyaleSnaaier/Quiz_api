@@ -1,0 +1,27 @@
+CREATE TABLE quizes (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE answers (
+    id SERIAL PRIMARY KEY,
+    quiz_id INT NOT NULL,
+    question_id INT NOT NULL,
+    answer_text TEXT NOT NULL,
+    is_correct BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (quiz_id) REFERENCES quizes(id) ON DELETE CASCADE
+);
+
+CREATE TABLE quiz_questions (
+    id SERIAL PRIMARY KEY,
+    quiz_id INT NOT NULL,
+    question_text TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (quiz_id) REFERENCES quizes(id) ON DELETE CASCADE
+);
