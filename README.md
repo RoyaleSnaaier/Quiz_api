@@ -473,7 +473,6 @@ This project is open source and available under the [MIT License](LICENSE).
 For issues and questions, please create an issue in the repository or contact the development team.
 
 ## TODO:
-## TODO:
 - **HTTPS Implementation**
     - Configure SSL/TLS certificates
     - Set up HTTPS redirection
