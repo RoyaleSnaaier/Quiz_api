@@ -8,17 +8,47 @@ RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
 
-# Route /quizzes and /quizzes/ID to the correct file in the pages directory
-RewriteRule ^quizzes/([0-9]+)$ pages/quizzes.php?id=$1 [L]
-RewriteRule ^quizzes$ pages/quizzes.php [L]
+# ======================================
+# PRIMARY ROUTES (Clean Architecture - Production)
+# ======================================
 
-# Route /quiz_questions and /quiz_questions/ID to the correct file in the pages directory
-RewriteRule ^quiz_questions/([0-9]+)$ pages/quiz_questions.php?id=$1 [L]
-RewriteRule ^quiz_questions$ pages/quiz_questions.php [L]
+# Main API routes using clean architecture implementation
+RewriteRule ^quizzes/([0-9]+)$ pages/quizzes_clean.php?id=$1 [L]
+RewriteRule ^quizzes$ pages/quizzes_clean.php [L]
 
-# Route /answers and /answers/ID to the correct file in the pages directory
-RewriteRule ^answers/([0-9]+)$ pages/answers.php?id=$1 [L]
-RewriteRule ^answers$ pages/answers.php [L]
+RewriteRule ^quiz_questions/([0-9]+)$ pages/quiz_questions_clean.php?id=$1 [L]
+RewriteRule ^quiz_questions$ pages/quiz_questions_clean.php [L]
+
+RewriteRule ^answers/([0-9]+)$ pages/answers_clean.php?id=$1 [L]
+RewriteRule ^answers$ pages/answers_clean.php [L]
+
+# ======================================
+# ALTERNATIVE CLEAN ROUTES (for transition period)
+# ======================================
+
+# Alternative clean endpoints for testing/transition
+RewriteRule ^quizzes-clean/([0-9]+)$ pages/quizzes_clean.php?id=$1 [L]
+RewriteRule ^quizzes-clean$ pages/quizzes_clean.php [L]
+
+RewriteRule ^quiz-questions-clean/([0-9]+)$ pages/quiz_questions_clean.php?id=$1 [L]
+RewriteRule ^quiz-questions-clean$ pages/quiz_questions_clean.php [L]
+
+RewriteRule ^answers-clean/([0-9]+)$ pages/answers_clean.php?id=$1 [L]
+RewriteRule ^answers-clean$ pages/answers_clean.php [L]
+
+# ======================================
+# LEGACY ROUTES (DEPRECATED - for backward compatibility)
+# ======================================
+
+# Legacy endpoints - these will show deprecation warnings
+RewriteRule ^quizzes-legacy/([0-9]+)$ pages/quizzes.php?id=$1 [L]
+RewriteRule ^quizzes-legacy$ pages/quizzes.php [L]
+
+RewriteRule ^quiz-questions-legacy/([0-9]+)$ pages/quiz_questions.php?id=$1 [L]
+RewriteRule ^quiz-questions-legacy$ pages/quiz_questions.php [L]
+
+RewriteRule ^answers-legacy/([0-9]+)$ pages/answers.php?id=$1 [L]
+RewriteRule ^answers-legacy$ pages/answers.php [L]
 
 # Add support for /pages/quizzes/ID route
 RewriteRule ^pages/quizzes/([0-9]+)$ pages/quizzes.php?id=$1 [L]
@@ -32,14 +62,41 @@ RewriteRule ^pages/quiz-questions$ pages/quiz_questions.php [L]
 RewriteRule ^pages/answers/([0-9]+)$ pages/answers.php?id=$1 [L]
 RewriteRule ^pages/answers$ pages/answers.php [L]
 
+# ======================================
+# SHARED ROUTES
+# ======================================
+
 # Route /quiz_complete/ID to get complete quiz with questions and answers
 RewriteRule ^quiz_complete/([0-9]+)$ pages/quiz_complete.php?id=$1 [L]
 
 # Route /db_health to database health check
 RewriteRule ^db_health$ pages/db_health.php [L]
 
-# Add support for /pages/quiz-complete/ID route
+# ======================================
+# DEVELOPMENT/TESTING ROUTES
+# ======================================
+
+# Add support for /pages/quizzes/ID route (development)
+RewriteRule ^pages/quizzes/([0-9]+)$ pages/quizzes.php?id=$1 [L]
+RewriteRule ^pages/quizzes$ pages/quizzes.php [L]
+
+# Add support for /pages/quiz-questions/ID route (development)
+RewriteRule ^pages/quiz-questions/([0-9]+)$ pages/quiz_questions.php?id=$1 [L]
+RewriteRule ^pages/quiz-questions$ pages/quiz_questions.php [L]
+
+# Add support for /pages/answers/ID route (development)
+RewriteRule ^pages/answers/([0-9]+)$ pages/answers.php?id=$1 [L]
+RewriteRule ^pages/answers$ pages/answers.php [L]
+
+# Add support for /pages/quiz-complete/ID route (development)
 RewriteRule ^pages/quiz-complete/([0-9]+)$ pages/quiz_complete.php?id=$1 [L]
+
+# ======================================
+# PRODUCTION ROUTE MIGRATION - COMPLETED
+# ======================================
+# Clean architecture is now the primary implementation for all main routes.
+# Legacy endpoints are available at /quizzes-legacy, /quiz-questions-legacy, /answers-legacy
+# Clean endpoints remain available as /quizzes-clean, /quiz-questions-clean, /answers-clean for transition
 
 # Remove .php extension from URLs - this needs to come last
 RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\ /([^.]+)\.php

@@ -1,8 +1,9 @@
-# Quiz API Testing Script
-# Run this script to test all API endpoints
+# Quiz API Testing Script - Clean Architecture (Primary Endpoints)
+# Run this script to test all API endpoints using the primary clean architecture implementation
 
-Write-Host "=== Quiz API Testing Script ===" -ForegroundColor Green
-Write-Host "Testing all endpoints of the Quiz API" -ForegroundColor Yellow
+Write-Host "=== Quiz API Testing Script (Clean Architecture) ===" -ForegroundColor Green
+Write-Host "Testing primary endpoints using clean architecture implementation" -ForegroundColor Yellow
+Write-Host "Version: 2.0.0 - Clean Architecture Production" -ForegroundColor Cyan
 Write-Host ""
 
 $baseUrl = "http://localhost:8080"

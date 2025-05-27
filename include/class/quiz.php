@@ -43,15 +43,13 @@ class Quiz {
 
     public function getTitle(): string {
         return $this->title;
-    }
-
-    public function setTitle(string $title): void {
+    }    public function setTitle(string $title): void {
         if (empty(trim($title))) {
             throw new QuizException("Title cannot be empty");
         }else if (strlen($title) > 255) {
             throw new QuizException("Title cannot exceed 255 characters");
-        }else if (!preg_match('/^[a-zA-Z0-9\s]+$/', $title)) {
-            throw new QuizException("Title can only contain alphanumeric characters and spaces");
+        }else if (!preg_match('/^[a-zA-Z0-9\s\-\.,!?\'":&()]+$/', $title)) {
+            throw new QuizException("Title contains invalid characters");
         }
         $this->title = $title;
     }

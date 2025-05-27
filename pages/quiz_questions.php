@@ -1,5 +1,18 @@
 <?php
 
+// ======================================
+// DEPRECATED ENDPOINT WARNING
+// ======================================
+// This endpoint is deprecated and will be removed in a future version.
+// Please migrate to the new clean architecture endpoints:
+// - Use /quiz_questions instead of this legacy endpoint
+// - Or use /quiz-questions-clean for explicit clean architecture access
+// ======================================
+
+// Send deprecation warning header
+header('X-API-Deprecation-Warning: This endpoint is deprecated. Use /quiz_questions or /quiz-questions-clean instead.');
+header('X-API-Migration-Guide: https://api-docs.example.com/migration-guide');
+
 require_once '../include/class/response.php';
 require_once '../include/db.php';
 require_once '../include/class/quiz_question.php';
