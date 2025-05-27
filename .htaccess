@@ -8,13 +8,29 @@ RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
 
-# Route /posts and /posts/ID to the correct file in the pages directory
-RewriteRule ^posts/([0-9]+)$ pages/posts.php?postId=$1 [L]
-RewriteRule ^posts$ pages/posts.php [L]
+# Route /quizzes and /quizzes/ID to the correct file in the pages directory
+RewriteRule ^quizzes/([0-9]+)$ pages/quizzes.php?id=$1 [L]
+RewriteRule ^quizzes$ pages/quizzes.php [L]
 
-# Add support for /pages/posts/ID route
-RewriteRule ^pages/posts/([0-9]+)$ pages/posts.php?postId=$1 [L]
-RewriteRule ^pages/posts$ pages/posts.php [L]
+# Route /quiz-questions and /quiz-questions/ID to the correct file in the pages directory
+RewriteRule ^quiz-questions/([0-9]+)$ pages/quiz_questions.php?id=$1 [L]
+RewriteRule ^quiz-questions$ pages/quiz_questions.php [L]
+
+# Route /answers and /answers/ID to the correct file in the pages directory
+RewriteRule ^answers/([0-9]+)$ pages/answers.php?id=$1 [L]
+RewriteRule ^answers$ pages/answers.php [L]
+
+# Add support for /pages/quizzes/ID route
+RewriteRule ^pages/quizzes/([0-9]+)$ pages/quizzes.php?id=$1 [L]
+RewriteRule ^pages/quizzes$ pages/quizzes.php [L]
+
+# Add support for /pages/quiz-questions/ID route
+RewriteRule ^pages/quiz-questions/([0-9]+)$ pages/quiz_questions.php?id=$1 [L]
+RewriteRule ^pages/quiz-questions$ pages/quiz_questions.php [L]
+
+# Add support for /pages/answers/ID route
+RewriteRule ^pages/answers/([0-9]+)$ pages/answers.php?id=$1 [L]
+RewriteRule ^pages/answers$ pages/answers.php [L]
 
 # Remove .php extension from URLs - this needs to come last
 RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\ /([^.]+)\.php
