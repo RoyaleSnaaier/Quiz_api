@@ -69,7 +69,6 @@ if (isset($_GET['id'])) {
         } else {
             new Response('Quiz not found', null, 404);
         }    } else if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        // This endpoint shouldn't be used for creating with a specific ID
         new Response('Method not allowed for this endpoint. Use POST without ID for creation.', null, 405);
     } else {
         new Response('Method not allowed', null, 405);
