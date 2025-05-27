@@ -12,9 +12,9 @@ RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^quizzes/([0-9]+)$ pages/quizzes.php?id=$1 [L]
 RewriteRule ^quizzes$ pages/quizzes.php [L]
 
-# Route /quiz-questions and /quiz-questions/ID to the correct file in the pages directory
-RewriteRule ^quiz-questions/([0-9]+)$ pages/quiz_questions.php?id=$1 [L]
-RewriteRule ^quiz-questions$ pages/quiz_questions.php [L]
+# Route /quiz_questions and /quiz_questions/ID to the correct file in the pages directory
+RewriteRule ^quiz_questions/([0-9]+)$ pages/quiz_questions.php?id=$1 [L]
+RewriteRule ^quiz_questions$ pages/quiz_questions.php [L]
 
 # Route /answers and /answers/ID to the correct file in the pages directory
 RewriteRule ^answers/([0-9]+)$ pages/answers.php?id=$1 [L]
@@ -32,8 +32,11 @@ RewriteRule ^pages/quiz-questions$ pages/quiz_questions.php [L]
 RewriteRule ^pages/answers/([0-9]+)$ pages/answers.php?id=$1 [L]
 RewriteRule ^pages/answers$ pages/answers.php [L]
 
-# Route /quiz-complete/ID to get complete quiz with questions and answers
-RewriteRule ^quiz-complete/([0-9]+)$ pages/quiz_complete.php?id=$1 [L]
+# Route /quiz_complete/ID to get complete quiz with questions and answers
+RewriteRule ^quiz_complete/([0-9]+)$ pages/quiz_complete.php?id=$1 [L]
+
+# Route /db_health to database health check
+RewriteRule ^db_health$ pages/db_health.php [L]
 
 # Add support for /pages/quiz-complete/ID route
 RewriteRule ^pages/quiz-complete/([0-9]+)$ pages/quiz_complete.php?id=$1 [L]

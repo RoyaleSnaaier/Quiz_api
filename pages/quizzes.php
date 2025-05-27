@@ -13,25 +13,30 @@ if (isset($_GET['id'])) {
 
         if (!$jsonData = json_decode($rawData)) {
             new Response('Invalid JSON data', null, 400);
-        }
-        try {
+        }        try {
             $quiz = new Quiz (
-                id: $jsonData->id ?? -1,
+                id: $_GET['id'],
                 title: $jsonData->title ?? '',
                 description: $jsonData->description ?? '',
                 category: $jsonData->category ?? null,
                 tags: $jsonData->tags ?? null,
                 imageUrl: $jsonData->imageUrl ?? null
-            );
-
-            $sql = "UPDATE quizes SET title = :title, description = :description, category = :category, tags = :tags, image_url = :image_url, updated_at = CURRENT_TIMESTAMP WHERE id = :id";
+            );            $sql = "UPDATE quizes SET title = :title, description = :description, category = :category, tags = :tags, image_url = :image_url, updated_at = CURRENT_TIMESTAMP WHERE id = :id";
             $stmt = getPDO()->prepare($sql);
-            $stmt->bindParam(':title', $quiz->getTitle());
-            $stmt->bindParam(':description', $quiz->getDescription());
-            $stmt->bindParam(':category', $quiz->getCategory());
-            $stmt->bindParam(':tags', $quiz->getTags());
-            $stmt->bindParam(':image_url', $quiz->getImageUrl());
-            $stmt->bindParam(':id', $quiz->getId(), PDO::PARAM_INT);
+            
+            $title = $quiz->getTitle();
+            $description = $quiz->getDescription();
+            $category = $quiz->getCategory();
+            $tags = $quiz->getTags();
+            $imageUrl = $quiz->getImageUrl();
+            $id = $quiz->getId();
+            
+            $stmt->bindParam(':title', $title);
+            $stmt->bindParam(':description', $description);
+            $stmt->bindParam(':category', $category);
+            $stmt->bindParam(':tags', $tags);
+            $stmt->bindParam(':image_url', $imageUrl);
+            $stmt->bindParam(':id', $id, PDO::PARAM_INT);
             $stmt->execute();
 
             if ($stmt->rowCount() > 0) {
@@ -135,11 +140,23 @@ if (isset($_GET['id'])) {
             $stmt->bindParam(':description', $description);
             $stmt->bindParam(':category', $category);
             $stmt->bindParam(':tags', $tags);
-            $stmt->bindParam(':image_url', $imageUrl);
-            $stmt->execute();
+            $stmt->bindParam(':image_url', $imageUrl);            $stmt->execute();
 
             // Get the ID of the newly created quiz
             $newQuizId = getPDO()->lastInsertId();
+            
+            // If lastInsertId fails, query the database for the newest quiz
+            if (!$newQuizId || $newQuizId == 0) {
+                $idStmt = getPDO()->prepare("SELECT id FROM quizes WHERE title = :title AND description = :description ORDER BY id DESC LIMIT 1");
+                $idStmt->bindParam(':title', $title);
+                $idStmt->bindParam(':description', $description);
+                $idStmt->execute();
+                $result = $idStmt->fetch(PDO::FETCH_ASSOC);
+                if ($result) {
+                    $newQuizId = $result['id'];
+                }
+            }
+            
             $quiz->setId(intval($newQuizId));
 
             if ($stmt->rowCount() > 0) {
