@@ -39,6 +39,10 @@ class Quiz {
     public function setTitle(string $title): void {
         if (empty(trim($title))) {
             throw new QuizException("Title cannot be empty");
+        }else if (strlen($title) > 255) {
+            throw new QuizException("Title cannot exceed 255 characters");
+        }else if (!preg_match('/^[a-zA-Z0-9\s]+$/', $title)) {
+            throw new QuizException("Title can only contain alphanumeric characters and spaces");
         }
         $this->title = $title;
     }
@@ -48,6 +52,11 @@ class Quiz {
     }
 
     public function setDescription(string $description): void {
+        if (strlen($description) > 1000) {
+            throw new QuizException("Description cannot exceed 1000 characters");
+        } else if (!preg_match('/^[a-zA-Z0-9\s.,!?\'"-]*$/', $description)) {
+            throw new QuizException("Description can only contain alphanumeric characters, spaces, and basic punctuation");
+        }
         $this->description = $description;
     }
 
