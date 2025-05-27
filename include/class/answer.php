@@ -8,6 +8,7 @@ class Answer {
     private int $questionId;
     private string $answerText;
     private bool $isCorrect;
+    private ?string $imageUrl;
     private string $createdAt;
     private string $updatedAt;
 
@@ -17,6 +18,7 @@ class Answer {
         int $questionId,
         string $answerText,
         bool $isCorrect = false,
+        ?string $imageUrl = null,
         string $createdAt = '',
         string $updatedAt = ''
     ) {
@@ -25,6 +27,7 @@ class Answer {
         $this->setQuestionId($questionId);
         $this->setAnswerText($answerText);
         $this->setIsCorrect($isCorrect);
+        $this->setImageUrl($imageUrl);
         $this->createdAt = $createdAt;
         $this->updatedAt = $updatedAt;
     }
@@ -83,6 +86,20 @@ class Answer {
         $this->isCorrect = $isCorrect;
     }
 
+    public function getImageUrl(): ?string {
+        return $this->imageUrl;
+    }
+
+    public function setImageUrl(?string $imageUrl): void {
+        if ($imageUrl !== null && strlen($imageUrl) > 500) {
+            throw new AnswerException("Image URL cannot exceed 500 characters");
+        }
+        if ($imageUrl !== null && !filter_var($imageUrl, FILTER_VALIDATE_URL)) {
+            throw new AnswerException("Invalid image URL format");
+        }
+        $this->imageUrl = $imageUrl;
+    }
+
     public function getCreatedAt(): string {
         return $this->createdAt;
     }
@@ -98,6 +115,7 @@ class Answer {
             'questionId' => $this->getQuestionId(),
             'answerText' => $this->getAnswerText(),
             'isCorrect' => $this->getIsCorrect(),
+            'imageUrl' => $this->getImageUrl(),
             'createdAt' => $this->getCreatedAt(),
             'updatedAt' => $this->getUpdatedAt()
         ];

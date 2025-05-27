@@ -6,6 +6,8 @@ class QuizQuestion {
     private int $id;
     private int $quizId;
     private string $question;
+    private ?int $timeLimit;
+    private ?string $imageUrl;
     private string $createdAt;
     private string $updatedAt;
 
@@ -13,12 +15,16 @@ class QuizQuestion {
         int $id,
         int $quizId,
         string $question,
+        ?int $timeLimit = null,
+        ?string $imageUrl = null,
         string $createdAt = '',
         string $updatedAt = ''
     ) {
         $this->setId($id);
         $this->setQuizId($quizId);
         $this->setQuestion($question);
+        $this->setTimeLimit($timeLimit);
+        $this->setImageUrl($imageUrl);
         $this->createdAt = $createdAt;
         $this->updatedAt = $updatedAt;
     }
@@ -58,6 +64,31 @@ class QuizQuestion {
         $this->question = htmlspecialchars($question, ENT_QUOTES, 'UTF-8');
     }
 
+    public function getTimeLimit(): ?int {
+        return $this->timeLimit;
+    }
+
+    public function setTimeLimit(?int $timeLimit): void {
+        if ($timeLimit !== null && $timeLimit <= 0) {
+            throw new QuizQuestionException("Time limit must be a positive number of seconds");
+        }
+        $this->timeLimit = $timeLimit;
+    }
+
+    public function getImageUrl(): ?string {
+        return $this->imageUrl;
+    }
+
+    public function setImageUrl(?string $imageUrl): void {
+        if ($imageUrl !== null && strlen($imageUrl) > 500) {
+            throw new QuizQuestionException("Image URL cannot exceed 500 characters");
+        }
+        if ($imageUrl !== null && !filter_var($imageUrl, FILTER_VALIDATE_URL)) {
+            throw new QuizQuestionException("Invalid image URL format");
+        }
+        $this->imageUrl = $imageUrl;
+    }
+
     public function getCreatedAt(): string {
         return $this->createdAt;
     }
@@ -71,6 +102,8 @@ class QuizQuestion {
             'id' => $this->getId(),
             'quizId' => $this->getQuizId(),
             'question' => $this->getQuestion(),
+            'timeLimit' => $this->getTimeLimit(),
+            'imageUrl' => $this->getImageUrl(),
             'createdAt' => $this->getCreatedAt(),
             'updatedAt' => $this->getUpdatedAt()
         ];

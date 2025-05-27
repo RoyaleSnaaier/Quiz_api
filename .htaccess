@@ -32,6 +32,12 @@ RewriteRule ^pages/quiz-questions$ pages/quiz_questions.php [L]
 RewriteRule ^pages/answers/([0-9]+)$ pages/answers.php?id=$1 [L]
 RewriteRule ^pages/answers$ pages/answers.php [L]
 
+# Route /quiz-complete/ID to get complete quiz with questions and answers
+RewriteRule ^quiz-complete/([0-9]+)$ pages/quiz_complete.php?id=$1 [L]
+
+# Add support for /pages/quiz-complete/ID route
+RewriteRule ^pages/quiz-complete/([0-9]+)$ pages/quiz_complete.php?id=$1 [L]
+
 # Remove .php extension from URLs - this needs to come last
 RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\ /([^.]+)\.php
 RewriteRule ^/?(.*)\.php$ /$1 [L,R=301]

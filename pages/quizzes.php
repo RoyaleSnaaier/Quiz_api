@@ -18,13 +18,19 @@ if (isset($_GET['id'])) {
             $quiz = new Quiz (
                 id: $jsonData->id ?? -1,
                 title: $jsonData->title ?? '',
-                description: $jsonData->description ?? ''
+                description: $jsonData->description ?? '',
+                category: $jsonData->category ?? null,
+                tags: $jsonData->tags ?? null,
+                imageUrl: $jsonData->imageUrl ?? null
             );
 
-            $sql = "UPDATE quizes SET title = :title, description = :description, updated_at = CURRENT_TIMESTAMP WHERE id = :id";
+            $sql = "UPDATE quizes SET title = :title, description = :description, category = :category, tags = :tags, image_url = :image_url, updated_at = CURRENT_TIMESTAMP WHERE id = :id";
             $stmt = getPDO()->prepare($sql);
             $stmt->bindParam(':title', $quiz->getTitle());
             $stmt->bindParam(':description', $quiz->getDescription());
+            $stmt->bindParam(':category', $quiz->getCategory());
+            $stmt->bindParam(':tags', $quiz->getTags());
+            $stmt->bindParam(':image_url', $quiz->getImageUrl());
             $stmt->bindParam(':id', $quiz->getId(), PDO::PARAM_INT);
             $stmt->execute();
 
@@ -78,8 +84,16 @@ if (isset($_GET['id'])) {
 
     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         try {
-            $sql = "SELECT * FROM quizes";
-            $stmt = getPDO()->prepare($sql);
+            // Add filtering by category
+            if (isset($_GET['category'])) {
+                $sql = "SELECT * FROM quizes WHERE category = :category";
+                $stmt = getPDO()->prepare($sql);
+                $stmt->bindParam(':category', $_GET['category']);
+            } else {
+                $sql = "SELECT * FROM quizes";
+                $stmt = getPDO()->prepare($sql);
+            }
+            
             $stmt->execute();
             $quizzes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -101,18 +115,27 @@ if (isset($_GET['id'])) {
 
         try {
             $quiz = new Quiz(
-                id: -1, // New quiz, so no ID yet
+                id: -1,
                 title: $jsonData->title ?? '',
-                description: $jsonData->description ?? ''
+                description: $jsonData->description ?? '',
+                category: $jsonData->category ?? null,
+                tags: $jsonData->tags ?? null,
+                imageUrl: $jsonData->imageUrl ?? null
             );
 
             $title = $quiz->getTitle();
             $description = $quiz->getDescription();
+            $category = $quiz->getCategory();
+            $tags = $quiz->getTags();
+            $imageUrl = $quiz->getImageUrl();
 
-            $sql = "INSERT INTO quizes (title, description) VALUES (:title, :description)";
+            $sql = "INSERT INTO quizes (title, description, category, tags, image_url) VALUES (:title, :description, :category, :tags, :image_url)";
             $stmt = getPDO()->prepare($sql);
             $stmt->bindParam(':title', $title);
             $stmt->bindParam(':description', $description);
+            $stmt->bindParam(':category', $category);
+            $stmt->bindParam(':tags', $tags);
+            $stmt->bindParam(':image_url', $imageUrl);
             $stmt->execute();
 
             // Get the ID of the newly created quiz

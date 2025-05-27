@@ -9,6 +9,7 @@ services:
       MYSQL_DATABASE: quiz_database
       MYSQL_USER: user
       MYSQL_PASSWORD: userpassword
+      SCHEMA_VERSION: "v2" # Force recreation by changing this value
     ports:
       - "3307:3306"
     volumes:
