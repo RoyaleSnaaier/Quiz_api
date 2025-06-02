@@ -13,29 +13,30 @@ if (isset($_GET['id'])) {
 
         if (!$jsonData = json_decode($rawData)) {
             new Response('Invalid JSON data', null, 400);
-        }
-
-        try {
+        }        try {
             $answer = new Answer (
                 id: $_GET['id'],
-                quizId: $jsonData->quizId ?? -1,
-                questionId: $jsonData->questionId ?? -1,
-                answerText: $jsonData->answerText ?? '',
-                isCorrect: $jsonData->isCorrect ?? false
+                quizId: $jsonData->quizId ?? $jsonData->quiz_id ?? -1,
+                questionId: $jsonData->questionId ?? $jsonData->question_id ?? -1,
+                answerText: $jsonData->answerText ?? $jsonData->answer_text ?? '',
+                isCorrect: $jsonData->isCorrect ?? $jsonData->is_correct ?? false,
+                imageUrl: $jsonData->imageUrl ?? $jsonData->image_url ?? null
             );
 
             $quizId = $answer->getQuizId();
             $questionId = $answer->getQuestionId();
             $answerText = $answer->getAnswerText();
             $isCorrect = $answer->getIsCorrect();
+            $imageUrl = $answer->getImageUrl();
             $answerId = $answer->getId();
 
-            $sql = "UPDATE answers SET quiz_id = :quiz_id, question_id = :question_id, answer_text = :answer_text, is_correct = :is_correct, updated_at = CURRENT_TIMESTAMP WHERE id = :id";
+            $sql = "UPDATE answers SET quiz_id = :quiz_id, question_id = :question_id, answer_text = :answer_text, is_correct = :is_correct, image_url = :image_url, updated_at = CURRENT_TIMESTAMP WHERE id = :id";
             $stmt = getPDO()->prepare($sql);
             $stmt->bindParam(':quiz_id', $quizId, PDO::PARAM_INT);
             $stmt->bindParam(':question_id', $questionId, PDO::PARAM_INT);
             $stmt->bindParam(':answer_text', $answerText);
             $stmt->bindParam(':is_correct', $isCorrect, PDO::PARAM_BOOL);
+            $stmt->bindParam(':image_url', $imageUrl);
             $stmt->bindParam(':id', $answerId, PDO::PARAM_INT);
             $stmt->execute();
 
@@ -123,28 +124,29 @@ if (isset($_GET['id'])) {
 
         if (!$jsonData = json_decode($rawData)) {
             new Response('Invalid JSON data', null, 400);
-        }
-
-        try {
+        }        try {
             $answer = new Answer(
                 id: -1, // New answer, so no ID yet
-                quizId: $jsonData->quizId ?? -1,
-                questionId: $jsonData->questionId ?? -1,
-                answerText: $jsonData->answerText ?? '',
-                isCorrect: $jsonData->isCorrect ?? false
+                quizId: $jsonData->quizId ?? $jsonData->quiz_id ?? -1,
+                questionId: $jsonData->questionId ?? $jsonData->question_id ?? -1,
+                answerText: $jsonData->answerText ?? $jsonData->answer_text ?? '',
+                isCorrect: $jsonData->isCorrect ?? $jsonData->is_correct ?? false,
+                imageUrl: $jsonData->imageUrl ?? $jsonData->image_url ?? null
             );
 
             $quizId = $answer->getQuizId();
             $questionId = $answer->getQuestionId();
             $answerText = $answer->getAnswerText();
             $isCorrect = $answer->getIsCorrect();
+            $imageUrl = $answer->getImageUrl();
 
-            $sql = "INSERT INTO answers (quiz_id, question_id, answer_text, is_correct) VALUES (:quiz_id, :question_id, :answer_text, :is_correct)";
+            $sql = "INSERT INTO answers (quiz_id, question_id, answer_text, is_correct, image_url) VALUES (:quiz_id, :question_id, :answer_text, :is_correct, :image_url)";
             $stmt = getPDO()->prepare($sql);
             $stmt->bindParam(':quiz_id', $quizId, PDO::PARAM_INT);
             $stmt->bindParam(':question_id', $questionId, PDO::PARAM_INT);
             $stmt->bindParam(':answer_text', $answerText);
             $stmt->bindParam(':is_correct', $isCorrect, PDO::PARAM_BOOL);
+            $stmt->bindParam(':image_url', $imageUrl);
             $stmt->execute();
 
             if ($stmt->rowCount() > 0) {

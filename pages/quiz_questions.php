@@ -17,27 +17,28 @@ if (isset($_GET['id'])) {
 
         // Debug: Log what we received
         error_log("PUT Request - Question ID from URL: " . $_GET['id']);
-        error_log("PUT Request - JSON Data: " . print_r($jsonData, true));
-
-        try {
+        error_log("PUT Request - JSON Data: " . print_r($jsonData, true));        try {
             $quizQuestion = new QuizQuestion (
                 id: $_GET['id'],
                 quizId: $jsonData->quizId ?? -1,
                 question: $jsonData->question ?? $jsonData->question_text ?? '',
-                timeLimit: $jsonData->timeLimit ?? null,
-                imageUrl: $jsonData->imageUrl ?? null
+                questionType: $jsonData->questionType ?? $jsonData->question_type ?? 'multiple_choice',
+                timeLimit: $jsonData->timeLimit ?? $jsonData->time_limit ?? null,
+                imageUrl: $jsonData->imageUrl ?? $jsonData->image_url ?? null
             );
 
             $quizId = $quizQuestion->getQuizId();
             $questionText = $quizQuestion->getQuestion();
+            $questionType = $quizQuestion->getQuestionType();
             $timeLimit = $quizQuestion->getTimeLimit();
             $imageUrl = $quizQuestion->getImageUrl();
             $questionId = $quizQuestion->getId();
 
-            $sql = "UPDATE quiz_questions SET quiz_id = :quiz_id, question_text = :question_text, time_limit = :time_limit, image_url = :image_url, updated_at = CURRENT_TIMESTAMP WHERE id = :id";
+            $sql = "UPDATE quiz_questions SET quiz_id = :quiz_id, question_text = :question_text, question_type = :question_type, time_limit = :time_limit, image_url = :image_url, updated_at = CURRENT_TIMESTAMP WHERE id = :id";
             $stmt = getPDO()->prepare($sql);
             $stmt->bindParam(':quiz_id', $quizId, PDO::PARAM_INT);
             $stmt->bindParam(':question_text', $questionText);
+            $stmt->bindParam(':question_type', $questionType);
             $stmt->bindParam(':time_limit', $timeLimit, PDO::PARAM_INT);
             $stmt->bindParam(':image_url', $imageUrl);
             $stmt->bindParam(':id', $questionId, PDO::PARAM_INT);
@@ -126,26 +127,27 @@ if (isset($_GET['id'])) {
 
         if (!$jsonData = json_decode($rawData)) {
             new Response('Invalid JSON data', null, 400);
-        }
-
-        try {
+        }        try {
             $quizQuestion = new QuizQuestion(
                 id: -1, // New question, so no ID yet
-                quizId: $jsonData->quizId ?? -1,
-                question: $jsonData->question ?? '',
-                timeLimit: $jsonData->timeLimit ?? null,
-                imageUrl: $jsonData->imageUrl ?? null
+                quizId: $jsonData->quizId ?? $jsonData->quiz_id ?? -1,
+                question: $jsonData->question ?? $jsonData->question_text ?? '',
+                questionType: $jsonData->questionType ?? $jsonData->question_type ?? 'multiple_choice',
+                timeLimit: $jsonData->timeLimit ?? $jsonData->time_limit ?? null,
+                imageUrl: $jsonData->imageUrl ?? $jsonData->image_url ?? null
             );
 
             $quizId = $quizQuestion->getQuizId();
             $question = $quizQuestion->getQuestion();
+            $questionType = $quizQuestion->getQuestionType();
             $timeLimit = $quizQuestion->getTimeLimit();
             $imageUrl = $quizQuestion->getImageUrl();
 
-            $sql = "INSERT INTO quiz_questions (quiz_id, question_text, time_limit, image_url) VALUES (:quiz_id, :question_text, :time_limit, :image_url)";
+            $sql = "INSERT INTO quiz_questions (quiz_id, question_text, question_type, time_limit, image_url) VALUES (:quiz_id, :question_text, :question_type, :time_limit, :image_url)";
             $stmt = getPDO()->prepare($sql);
             $stmt->bindParam(':quiz_id', $quizId, PDO::PARAM_INT);
             $stmt->bindParam(':question_text', $question);
+            $stmt->bindParam(':question_type', $questionType);
             $stmt->bindParam(':time_limit', $timeLimit, PDO::PARAM_INT);
             $stmt->bindParam(':image_url', $imageUrl);
             $stmt->execute();

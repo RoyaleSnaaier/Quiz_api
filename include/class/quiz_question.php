@@ -6,6 +6,7 @@ class QuizQuestion {
     private int $id;
     private int $quizId;
     private string $question;
+    private string $questionType;
     private ?int $timeLimit;
     private ?string $imageUrl;
     private string $createdAt;
@@ -15,6 +16,7 @@ class QuizQuestion {
         int $id,
         int $quizId,
         string $question,
+        string $questionType = 'multiple_choice',
         ?int $timeLimit = null,
         ?string $imageUrl = null,
         string $createdAt = '',
@@ -23,6 +25,7 @@ class QuizQuestion {
         $this->setId($id);
         $this->setQuizId($quizId);
         $this->setQuestion($question);
+        $this->setQuestionType($questionType);
         $this->setTimeLimit($timeLimit);
         $this->setImageUrl($imageUrl);
         $this->createdAt = $createdAt;
@@ -49,9 +52,7 @@ class QuizQuestion {
             throw new QuizQuestionException("Quiz ID must be a positive integer");
         }
         $this->quizId = $quizId;
-    }
-
-    public function getQuestion(): string {
+    }    public function getQuestion(): string {
         return $this->question;
     }
 
@@ -62,6 +63,18 @@ class QuizQuestion {
             throw new QuizQuestionException("Question cannot exceed 500 characters");
         }
         $this->question = htmlspecialchars($question, ENT_QUOTES, 'UTF-8');
+    }
+
+    public function getQuestionType(): string {
+        return $this->questionType;
+    }
+
+    public function setQuestionType(string $questionType): void {
+        $allowedTypes = ['multiple_choice', 'true_false', 'text', 'single_choice'];
+        if (!in_array($questionType, $allowedTypes)) {
+            throw new QuizQuestionException("Question type must be one of: " . implode(', ', $allowedTypes));
+        }
+        $this->questionType = $questionType;
     }
 
     public function getTimeLimit(): ?int {
@@ -95,13 +108,12 @@ class QuizQuestion {
 
     public function getUpdatedAt(): string {
         return $this->updatedAt;
-    }
-
-    public function toArray(): array {
+    }    public function toArray(): array {
         return [
             'id' => $this->getId(),
             'quizId' => $this->getQuizId(),
             'question' => $this->getQuestion(),
+            'questionType' => $this->getQuestionType(),
             'timeLimit' => $this->getTimeLimit(),
             'imageUrl' => $this->getImageUrl(),
             'createdAt' => $this->getCreatedAt(),

@@ -16,13 +16,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id'])) {
         if (!$quiz) {
             new Response('Quiz not found', null, 404);
         }
-        
-        // Get questions with answers
+          // Get questions with answers
         $questionsStmt = getPDO()->prepare("
-            SELECT q.*, 
+            SELECT q.id, q.quiz_id, q.question_text, q.question_type, q.time_limit, q.image_url, q.created_at, q.updated_at,
                    a.id as answer_id, 
                    a.answer_text, 
-                   a.is_correct
+                   a.is_correct,
+                   a.image_url as answer_image_url,
+                   a.created_at as answer_created_at,
+                   a.updated_at as answer_updated_at
             FROM quiz_questions q 
             LEFT JOIN answers a ON q.id = a.question_id 
             WHERE q.quiz_id = :quiz_id 
@@ -38,7 +40,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id'])) {
             if (!isset($questions[$row['id']])) {
                 $questions[$row['id']] = [
                     'id' => $row['id'],
+                    'quiz_id' => $row['quiz_id'],
                     'question_text' => $row['question_text'],
+                    'question_type' => $row['question_type'],
+                    'time_limit' => $row['time_limit'],
+                    'image_url' => $row['image_url'],
                     'created_at' => $row['created_at'],
                     'updated_at' => $row['updated_at'],
                     'answers' => []
@@ -48,8 +54,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id'])) {
             if ($row['answer_id']) {
                 $questions[$row['id']]['answers'][] = [
                     'id' => $row['answer_id'],
+                    'quiz_id' => $row['quiz_id'],
+                    'question_id' => $row['id'],
                     'answer_text' => $row['answer_text'],
-                    'is_correct' => (bool)$row['is_correct']
+                    'is_correct' => (bool)$row['is_correct'],
+                    'image_url' => $row['answer_image_url'],
+                    'created_at' => $row['answer_created_at'],
+                    'updated_at' => $row['answer_updated_at']
                 ];
             }
         }
