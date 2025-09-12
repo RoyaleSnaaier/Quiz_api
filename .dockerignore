@@ -1,0 +1,29 @@
+# Git files
+.git
+.gitignore
+
+# Docker compose file
+docker-compose.yml
+
+# Environment files
+.env*
+
+# Documentation
+README.md
+*.md
+
+# Development files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
