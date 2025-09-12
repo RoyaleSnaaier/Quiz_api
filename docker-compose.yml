@@ -47,18 +47,6 @@ services:
       - quiz_network
     restart: unless-stopped
 
-  # Optional: Database admin interface
-  adminer:
-    image: adminer:latest
-    container_name: quiz_adminer
-    ports:
-      - "8080:8080"
-    depends_on:
-      - db
-    networks:
-      - quiz_network
-    restart: unless-stopped
-
 # Named volumes for data persistence
 volumes:
   mysql_data:
