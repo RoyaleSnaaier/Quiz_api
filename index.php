@@ -6,7 +6,8 @@ echo json_encode([
     'version' => '1.0.0',
     'endpoints' => [
         'health' => '/api/health',
-        'quizzes' => '/api/v1/quizzes'
+        'quizzes' => '/api/endpoints/quizzes.php'
+        ''
     ],
     'documentation' => 'Coming soon!'
 ]);

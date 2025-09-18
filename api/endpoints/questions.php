@@ -2,9 +2,9 @@
     require_once("../../config/db.php");
     header('Content-Type: application/json');
 
-    $sql = "SELECT * FROM quizzes";
+    $sql = "SELECT * FROM questions";
     $stmt = $pdo->query($sql);
-    $quizzes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $questions = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    echo json_encode($quizzes);
+    echo json_encode($questions);
 ?>
