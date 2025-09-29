@@ -14,10 +14,22 @@
     $method = $_SERVER['REQUEST_METHOD'];
     $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
     $segments = explode('/', trim($uri, '/'));
+    
+    // Also check REDIRECT_URL for rewritten requests
+    if (isset($_SERVER['REDIRECT_URL'])) {
+        $redirectUri = parse_url($_SERVER['REDIRECT_URL'], PHP_URL_PATH);
+        $redirectSegments = explode('/', trim($redirectUri, '/'));
+        if (count($redirectSegments) > count($segments)) {
+            $segments = $redirectSegments;
+        }
+    }
 
-    try {
+    try {        
         // GET /api/quizzes - Get all quizzes
-        if ($method === 'GET' && count($segments) == 2 && $segments[1] === 'quizzes') {
+        if ($method === 'GET' && (
+            (count($segments) == 2 && $segments[1] === 'quizzes') ||
+            (count($segments) == 3 && $segments[2] === 'quizzes')
+        )) {
             $sql = "SELECT q.*, COUNT(qs.id) as question_count 
                     FROM quizzes q 
                     LEFT JOIN questions qs ON q.id = qs.quiz_id 
@@ -28,8 +40,16 @@
             echo json_encode($quizzes);
             
         // GET /api/quizzes/{id} - Get specific quiz
-        } elseif ($method === 'GET' && count($segments) >= 3 && $segments[1] === 'quizzes') {
-            $quizId = intval($segments[2]);
+        } elseif ($method === 'GET' && count($segments) >= 3) {
+            // Find quiz ID from segments
+            $quizId = 0;
+            for ($i = 0; $i < count($segments); $i++) {
+                if ($segments[$i] === 'quizzes' && isset($segments[$i + 1])) {
+                    $quizId = intval($segments[$i + 1]);
+                    break;
+                }
+            }
+            
             if ($quizId <= 0) {
                 throw new Exception('Invalid quiz ID');
             }
@@ -59,7 +79,10 @@
             echo json_encode($quiz);
             
         // POST /api/quizzes - Create new quiz
-        } elseif ($method === 'POST' && count($segments) == 2 && $segments[1] === 'quizzes') {
+        } elseif ($method === 'POST' && (
+            (count($segments) == 2 && $segments[1] === 'quizzes') ||
+            (count($segments) == 3 && $segments[2] === 'quizzes')
+        )) {
             $data = json_decode(file_get_contents('php://input'), true);
             if (json_last_error() !== JSON_ERROR_NONE) {
                 throw new Exception('Invalid JSON payload');
@@ -84,8 +107,16 @@
             ]);
             
         // PUT /api/quizzes/{id} - Update quiz
-        } elseif ($method === 'PUT' && count($segments) >= 3 && $segments[1] === 'quizzes') {
-            $quizId = intval($segments[2]);
+        } elseif ($method === 'PUT' && count($segments) >= 3) {
+            // Find quiz ID from segments
+            $quizId = 0;
+            for ($i = 0; $i < count($segments); $i++) {
+                if ($segments[$i] === 'quizzes' && isset($segments[$i + 1])) {
+                    $quizId = intval($segments[$i + 1]);
+                    break;
+                }
+            }
+            
             if ($quizId <= 0) {
                 throw new Exception('Invalid quiz ID');
             }
@@ -119,8 +150,16 @@
             echo json_encode(['message' => 'Quiz updated successfully']);
             
         // DELETE /api/quizzes/{id} - Delete quiz
-        } elseif ($method === 'DELETE' && count($segments) >= 3 && $segments[1] === 'quizzes') {
-            $quizId = intval($segments[2]);
+        } elseif ($method === 'DELETE' && count($segments) >= 3) {
+            // Find quiz ID from segments
+            $quizId = 0;
+            for ($i = 0; $i < count($segments); $i++) {
+                if ($segments[$i] === 'quizzes' && isset($segments[$i + 1])) {
+                    $quizId = intval($segments[$i + 1]);
+                    break;
+                }
+            }
+            
             if ($quizId <= 0) {
                 throw new Exception('Invalid quiz ID');
             }
@@ -143,7 +182,7 @@
             
         } else {
             http_response_code(404);
-            echo json_encode(['error' => 'Endpoint not found', 'path' => $uri]);
+            echo json_encode(['error' => 'Endpoint not found', 'path' => $uri, 'method' => $method, 'segments' => $segments]);
         }
         
     } catch (PDOException $e) {

@@ -2,3 +2,19 @@
     Order Allow,Deny
     Deny from all
 </Files>
+
+# Enable URL Rewriting
+RewriteEngine On
+
+# Handle API routes
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Route /api/quizzes/* to quizzes.php
+RewriteRule ^api/quizzes/?(.*)$ /api/endpoints/quizzes.php [L,QSA]
+
+# Route /api/questions/* to questions.php  
+RewriteRule ^api/questions/?(.*)$ /api/endpoints/questions.php [L,QSA]
+
+# Route /api/health to health.php
+RewriteRule ^api/health/?$ /api/health.php [L,QSA]

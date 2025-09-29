@@ -14,16 +14,28 @@
     $method = $_SERVER['REQUEST_METHOD'];
     $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
     $segments = explode('/', trim($uri, '/'));
+    
+    // Also check REDIRECT_URL for rewritten requests
+    if (isset($_SERVER['REDIRECT_URL'])) {
+        $redirectUri = parse_url($_SERVER['REDIRECT_URL'], PHP_URL_PATH);
+        $redirectSegments = explode('/', trim($redirectUri, '/'));
+        if (count($redirectSegments) > count($segments)) {
+            $segments = $redirectSegments;
+        }
+    }
 
     try {
         // GET /api/quizzes/{quizId}/questions
-        if ($method === 'GET' 
-            && count($segments) >= 4 
-            && $segments[0] === 'api' 
-            && $segments[1] === 'quizzes' 
-            && $segments[3] === 'questions'
-        ) {
-            $quizId = intval($segments[2]);
+        if ($method === 'GET' && in_array('questions', $segments) && in_array('quizzes', $segments)) {
+            // Find quiz ID from segments
+            $quizId = 0;
+            for ($i = 0; $i < count($segments); $i++) {
+                if ($segments[$i] === 'quizzes' && isset($segments[$i + 1]) && $segments[$i + 1] !== 'questions') {
+                    $quizId = intval($segments[$i + 1]);
+                    break;
+                }
+            }
+            
             if ($quizId <= 0) {
                 throw new Exception('Invalid quiz ID');
             }
@@ -38,12 +50,16 @@
             echo json_encode($questions);
             
         // GET /api/questions/{id}
-        } elseif ($method === 'GET' 
-            && count($segments) >= 3 
-            && $segments[0] === 'api' 
-            && $segments[1] === 'questions'
-        ) {
-            $questionId = intval($segments[2]);
+        } elseif ($method === 'GET' && in_array('questions', $segments)) {
+            // Find question ID from segments
+            $questionId = 0;
+            for ($i = 0; $i < count($segments); $i++) {
+                if ($segments[$i] === 'questions' && isset($segments[$i + 1])) {
+                    $questionId = intval($segments[$i + 1]);
+                    break;
+                }
+            }
+            
             if ($questionId <= 0) {
                 throw new Exception('Invalid question ID');
             }
@@ -63,13 +79,16 @@
             echo json_encode($question);
             
         // POST /api/quizzes/{quizId}/questions
-        } elseif ($method === 'POST' 
-            && count($segments) >= 4 
-            && $segments[0] === 'api' 
-            && $segments[1] === 'quizzes' 
-            && $segments[3] === 'questions'
-        ) {
-            $quizId = intval($segments[2]);
+        } elseif ($method === 'POST' && in_array('questions', $segments) && in_array('quizzes', $segments)) {
+            // Find quiz ID from segments
+            $quizId = 0;
+            for ($i = 0; $i < count($segments); $i++) {
+                if ($segments[$i] === 'quizzes' && isset($segments[$i + 1]) && $segments[$i + 1] !== 'questions') {
+                    $quizId = intval($segments[$i + 1]);
+                    break;
+                }
+            }
+            
             if ($quizId <= 0) {
                 throw new Exception('Invalid quiz ID');
             }
@@ -103,12 +122,16 @@
             ]);
             
         // PUT /api/questions/{id}
-        } elseif ($method === 'PUT' 
-            && count($segments) >= 3 
-            && $segments[0] === 'api' 
-            && $segments[1] === 'questions'
-        ) {
-            $questionId = intval($segments[2]);
+        } elseif ($method === 'PUT' && in_array('questions', $segments)) {
+            // Find question ID from segments
+            $questionId = 0;
+            for ($i = 0; $i < count($segments); $i++) {
+                if ($segments[$i] === 'questions' && isset($segments[$i + 1])) {
+                    $questionId = intval($segments[$i + 1]);
+                    break;
+                }
+            }
+            
             if ($questionId <= 0) {
                 throw new Exception('Invalid question ID');
             }
@@ -138,12 +161,16 @@
             echo json_encode(['message' => 'Question updated successfully']);
             
         // DELETE /api/questions/{id}
-        } elseif ($method === 'DELETE' 
-            && count($segments) >= 3 
-            && $segments[0] === 'api' 
-            && $segments[1] === 'questions'
-        ) {
-            $questionId = intval($segments[2]);
+        } elseif ($method === 'DELETE' && in_array('questions', $segments)) {
+            // Find question ID from segments
+            $questionId = 0;
+            for ($i = 0; $i < count($segments); $i++) {
+                if ($segments[$i] === 'questions' && isset($segments[$i + 1])) {
+                    $questionId = intval($segments[$i + 1]);
+                    break;
+                }
+            }
+            
             if ($questionId <= 0) {
                 throw new Exception('Invalid question ID');
             }
@@ -165,7 +192,7 @@
             
         } else {
             http_response_code(404);
-            echo json_encode(['error' => 'Endpoint not found', 'path' => $uri]);
+            echo json_encode(['error' => 'Endpoint not found', 'path' => $uri, 'method' => $method, 'segments' => $segments]);
         }
         
     } catch (PDOException $e) {
