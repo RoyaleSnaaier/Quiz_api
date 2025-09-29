@@ -16,16 +16,11 @@ echo json_encode([
                 'url' => '/api/endpoints/quizzes.php',
                 'method' => 'GET',
                 'description' => 'Get all quizzes'
-            ],
-            'v1_endpoint' => [
-                'url' => '/api/v1/quizzes',
-                'method' => 'GET',
-                'description' => 'V1 quizzes endpoint (coming soon)'
             ]
         ],
         'questions' => [
             'get_by_quiz' => [
-                'url' => '/api/quizzes/{quizId}/questions',
+                'url' => '/api/endpoints/quizzes/{quizId}/questions',
                 'method' => 'GET',
                 'description' => 'Get all questions for a specific quiz'
             ],

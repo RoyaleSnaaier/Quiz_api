@@ -1,80 +1,176 @@
 <?php
     require_once("../../config/db.php");
     header('Content-Type: application/json');
+    header('Access-Control-Allow-Origin: *');
+    header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+    header('Access-Control-Allow-Headers: Content-Type, Authorization');
+
+    // Handle preflight requests
+    if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+        http_response_code(200);
+        exit();
+    }
 
     $method = $_SERVER['REQUEST_METHOD'];
     $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
     $segments = explode('/', trim($uri, '/'));
 
     try {
-        if ($method === 'GET'
-            && isset($segments[1], $segments[2], $segments[3])
-            && $segments[1] === 'quizzes'
+        // GET /api/quizzes/{quizId}/questions
+        if ($method === 'GET' 
+            && count($segments) >= 4 
+            && $segments[0] === 'api' 
+            && $segments[1] === 'quizzes' 
             && $segments[3] === 'questions'
         ) {
-            // GET /api/quizzes/{quizId}/questions
             $quizId = intval($segments[2]);
-            $sql = "SELECT * FROM questions WHERE quiz_id = ?";
+            if ($quizId <= 0) {
+                throw new Exception('Invalid quiz ID');
+            }
+            
+            $sql = "SELECT q.*, qt.type FROM questions q 
+                    LEFT JOIN question_type qt ON q.id = qt.question_id 
+                    WHERE q.quiz_id = ? 
+                    ORDER BY q.id";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$quizId]);
             $questions = $stmt->fetchAll(PDO::FETCH_ASSOC);
             echo json_encode($questions);
-        } elseif ($method === 'GET'
-            && isset($segments[1], $segments[2])
+            
+        // GET /api/questions/{id}
+        } elseif ($method === 'GET' 
+            && count($segments) >= 3 
+            && $segments[0] === 'api' 
             && $segments[1] === 'questions'
         ) {
-            // GET /api/questions/{id}
             $questionId = intval($segments[2]);
-            $sql = "SELECT * FROM questions WHERE id = ?";
+            if ($questionId <= 0) {
+                throw new Exception('Invalid question ID');
+            }
+            
+            $sql = "SELECT q.*, qt.type FROM questions q 
+                    LEFT JOIN question_type qt ON q.id = qt.question_id 
+                    WHERE q.id = ?";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$questionId]);
             $question = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$question) {
+                http_response_code(404);
+                echo json_encode(['error' => 'Question not found']);
+                exit;
+            }
             echo json_encode($question);
-        } elseif ($method === 'POST'
-            && isset($segments[1], $segments[2], $segments[3])
-            && $segments[1] === 'quizzes'
+            
+        // POST /api/quizzes/{quizId}/questions
+        } elseif ($method === 'POST' 
+            && count($segments) >= 4 
+            && $segments[0] === 'api' 
+            && $segments[1] === 'quizzes' 
             && $segments[3] === 'questions'
         ) {
-            // POST /api/quizzes/{quizId}/questions
             $quizId = intval($segments[2]);
+            if ($quizId <= 0) {
+                throw new Exception('Invalid quiz ID');
+            }
+            
+            // Check if quiz exists
+            $checkQuiz = $pdo->prepare("SELECT id FROM quizzes WHERE id = ?");
+            $checkQuiz->execute([$quizId]);
+            if (!$checkQuiz->fetch()) {
+                http_response_code(404);
+                echo json_encode(['error' => 'Quiz not found']);
+                exit;
+            }
+            
             $data = json_decode(file_get_contents('php://input'), true);
             if (json_last_error() !== JSON_ERROR_NONE) {
                 throw new Exception('Invalid JSON payload');
             }
-            // Insert new question (column name 'question' in database)
-            $sql = "INSERT INTO questions (quiz_id, question) VALUES (?, ?)";
+            
+            if (!isset($data['question']) || empty($data['question'])) {
+                throw new Exception('Question text is required');
+            }
+            
+            $sql = "INSERT INTO questions (quiz_id, question, created_at) VALUES (?, ?, NOW())";
             $stmt = $pdo->prepare($sql);
-            $stmt->execute([$quizId, $data['question_text']]);
-            echo json_encode(['message' => 'Question added successfully']);
-        } elseif ($method === 'PUT'
-            && isset($segments[1], $segments[2])
+            $stmt->execute([$quizId, $data['question']]);
+            
+            $questionId = $pdo->lastInsertId();
+            echo json_encode([
+                'message' => 'Question added successfully',
+                'question_id' => $questionId
+            ]);
+            
+        // PUT /api/questions/{id}
+        } elseif ($method === 'PUT' 
+            && count($segments) >= 3 
+            && $segments[0] === 'api' 
             && $segments[1] === 'questions'
         ) {
-            // PUT /api/questions/{id}
             $questionId = intval($segments[2]);
+            if ($questionId <= 0) {
+                throw new Exception('Invalid question ID');
+            }
+            
+            // Check if question exists
+            $checkQuestion = $pdo->prepare("SELECT id FROM questions WHERE id = ?");
+            $checkQuestion->execute([$questionId]);
+            if (!$checkQuestion->fetch()) {
+                http_response_code(404);
+                echo json_encode(['error' => 'Question not found']);
+                exit;
+            }
+            
             $data = json_decode(file_get_contents('php://input'), true);
             if (json_last_error() !== JSON_ERROR_NONE) {
                 throw new Exception('Invalid JSON payload');
             }
-            // Update question text (column name 'question')
+            
+            if (!isset($data['question']) || empty($data['question'])) {
+                throw new Exception('Question text is required');
+            }
+            
             $sql = "UPDATE questions SET question = ? WHERE id = ?";
             $stmt = $pdo->prepare($sql);
-            $stmt->execute([$data['question_text'], $questionId]);
+            $stmt->execute([$data['question'], $questionId]);
+            
             echo json_encode(['message' => 'Question updated successfully']);
-        } elseif ($method === 'DELETE'
-            && isset($segments[1], $segments[2])
+            
+        // DELETE /api/questions/{id}
+        } elseif ($method === 'DELETE' 
+            && count($segments) >= 3 
+            && $segments[0] === 'api' 
             && $segments[1] === 'questions'
         ) {
-            // DELETE /api/questions/{id}
             $questionId = intval($segments[2]);
+            if ($questionId <= 0) {
+                throw new Exception('Invalid question ID');
+            }
+            
+            // Check if question exists
+            $checkQuestion = $pdo->prepare("SELECT id FROM questions WHERE id = ?");
+            $checkQuestion->execute([$questionId]);
+            if (!$checkQuestion->fetch()) {
+                http_response_code(404);
+                echo json_encode(['error' => 'Question not found']);
+                exit;
+            }
+            
             $sql = "DELETE FROM questions WHERE id = ?";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$questionId]);
+            
             echo json_encode(['message' => 'Question deleted successfully']);
+            
         } else {
             http_response_code(404);
-            echo json_encode(['message' => 'Endpoint not found']);
+            echo json_encode(['error' => 'Endpoint not found', 'path' => $uri]);
         }
+        
+    } catch (PDOException $e) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Database error: ' . $e->getMessage()]);
     } catch (Exception $e) {
         http_response_code(400);
         echo json_encode(['error' => $e->getMessage()]);
