@@ -2,7 +2,7 @@
 -- Host:                         127.0.0.1
 -- Server version:               8.0.42 - MySQL Community Server - GPL
 -- Server OS:                    Linux
--- HeidiSQL Version:             12.6.0.6765
+-- HeidiSQL Version:             12.11.0.7065
 -- --------------------------------------------------------
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -24,15 +24,28 @@ CREATE TABLE IF NOT EXISTS `questions` (
   `id` int NOT NULL AUTO_INCREMENT,
   `quiz_id` int NOT NULL,
   `type_id` smallint DEFAULT NULL,
-  `question` varchar(50) NOT NULL,
+  `question` varchar(255) NOT NULL,
   `time` time DEFAULT NULL,
-  `created_at` timestamp NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `FK_questions_quizzes` (`quiz_id`),
-  CONSTRAINT `FK_questions_quizzes` FOREIGN KEY (`quiz_id`) REFERENCES `quizzes` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  CONSTRAINT `FK_questions_quizzes` FOREIGN KEY (`quiz_id`) REFERENCES `quizzes` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Dumping data for table quiz_db.questions: ~0 rows (approximately)
+-- Data exporting was unselected.
+
+-- Dumping structure for table quiz_db.question_options
+CREATE TABLE IF NOT EXISTS `question_options` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `question_id` int NOT NULL,
+  `option_text` varchar(255) NOT NULL,
+  `is_correct` tinyint(1) DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `FK_options_questions` (`question_id`),
+  CONSTRAINT `FK_options_questions` FOREIGN KEY (`question_id`) REFERENCES `questions` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=57 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Data exporting was unselected.
 
 -- Dumping structure for table quiz_db.question_type
 CREATE TABLE IF NOT EXISTS `question_type` (
@@ -41,21 +54,21 @@ CREATE TABLE IF NOT EXISTS `question_type` (
   `type` enum('MC','YN') DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_question_type_questions` (`question_id`),
-  CONSTRAINT `FK_question_type_questions` FOREIGN KEY (`question_id`) REFERENCES `questions` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  CONSTRAINT `FK_question_type_questions` FOREIGN KEY (`question_id`) REFERENCES `questions` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Dumping data for table quiz_db.question_type: ~0 rows (approximately)
+-- Data exporting was unselected.
 
 -- Dumping structure for table quiz_db.quizzes
 CREATE TABLE IF NOT EXISTS `quizzes` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'Custom quiz',
   `description` varchar(255) NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Dumping data for table quiz_db.quizzes: ~0 rows (approximately)
+-- Data exporting was unselected.
 
 -- Dumping structure for table quiz_db.users
 CREATE TABLE IF NOT EXISTS `users` (
@@ -63,13 +76,13 @@ CREATE TABLE IF NOT EXISTS `users` (
   `username` varchar(50) NOT NULL,
   `password` varchar(100) NOT NULL,
   `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `tel` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Dumping data for table quiz_db.users: ~0 rows (approximately)
+-- Data exporting was unselected.
 
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
