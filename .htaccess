@@ -17,4 +17,4 @@ RewriteRule ^api/quizzes/?(.*)$ /api/endpoints/quizzes.php [L,QSA]
 RewriteRule ^api/questions/?(.*)$ /api/endpoints/questions.php [L,QSA]
 
 # Route /api/health to health.php
-RewriteRule ^api/health/?$ /api/health.php [L,QSA]
+RewriteRule ^api/health/?$ /api/endpoints/health.php [L,QSA]

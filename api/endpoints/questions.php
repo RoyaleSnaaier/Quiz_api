@@ -47,6 +47,16 @@
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$quizId]);
             $questions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            // Get options for each question
+            foreach ($questions as &$question) {
+                $optionsSql = "SELECT id, option_text, is_correct FROM question_options WHERE question_id = ? ORDER BY id";
+                $optionsStmt = $pdo->prepare($optionsSql);
+                $optionsStmt->execute([$question['id']]);
+                $options = $optionsStmt->fetchAll(PDO::FETCH_ASSOC);
+                $question['options'] = $options;
+            }
+            
             echo json_encode($questions);
             
         // GET /api/questions/{id}
@@ -76,6 +86,14 @@
                 echo json_encode(['error' => 'Question not found']);
                 exit;
             }
+
+            // Get question options
+            $optionsSql = "SELECT id, option_text, is_correct FROM question_options WHERE question_id = ? ORDER BY id";
+            $optionsStmt = $pdo->prepare($optionsSql);
+            $optionsStmt->execute([$questionId]);
+            $options = $optionsStmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            $question['options'] = $options;
             echo json_encode($question);
             
         // POST /api/quizzes/{quizId}/questions
